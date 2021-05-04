@@ -12,7 +12,7 @@ A visualizer for music;
 #### Run locally
 1. Clone the repo  
 ```
-git clone git@github.com:Eric-Schecter/music-visualizer-project.git
+git clone git@github.com:Eric-Schecter/music-visualizer.git
 ```
 2. Open Folder  
 ```
