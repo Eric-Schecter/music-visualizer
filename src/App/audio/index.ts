@@ -54,9 +54,8 @@ export class AudioProcessor {
     const { frequency, currentTime } = this.analyser.getData();
     if (!this.audio || !this.audio?.isStart) {
       this.offset = (Date.now() - this.time) / 1000;
-      console.log(1)
     }
-    console.log(this.offset,Date.now(),this.time)
+    console.log(this.offset,currentTime,currentTime-this.offset)
     return {
       duration: this.audio?.duration,
       currentTime: currentTime - this.offset,
