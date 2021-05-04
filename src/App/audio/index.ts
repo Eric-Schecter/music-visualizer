@@ -9,9 +9,8 @@ export class AudioProcessor {
   private audio?: Audio;
   private analyser: Analyser;
   private context: AudioContext;
-  private time = Date.now();
   private offset = 0;
-  private _status:Promise<Status> = Promise.resolve('stop');
+  private _status: Promise<Status> = Promise.resolve('stop');
   constructor(private url: string, outputSize = 2048) {
     this.response = this.getAudioFile(url);
     const fft = getfft(outputSize);
@@ -36,9 +35,8 @@ export class AudioProcessor {
     return audio;
   }
   public start = async () => {
-    this._status = new Promise(async(resolve)=>{
+    this._status = new Promise(async (resolve) => {
       if (!this.audio) {
-        this.time = Date.now();
         this.audio = await this.initAudio();
       }
       if (!this.audio.isPlaying) {
@@ -52,12 +50,12 @@ export class AudioProcessor {
   }
   public getData() {
     const { frequency, currentTime } = this.analyser.getData();
-    if (!this.audio || !this.audio.isStart) {
-      this.offset = (Date.now() - this.time) / 1000;
+    if (!this.audio) {
+      this.offset = currentTime;
     }
     return {
       duration: this.audio?.duration,
-      currentTime: currentTime === 0 ? 0 : currentTime - this.offset,
+      currentTime: currentTime - this.offset,
       frequency,
     }
   };
