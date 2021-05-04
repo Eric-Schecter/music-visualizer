@@ -38,8 +38,8 @@ export class AudioProcessor {
   public start = async () => {
     this._status = new Promise(async(resolve)=>{
       if (!this.audio) {
-        this.audio = await this.initAudio();
         this.time = Date.now();
+        this.audio = await this.initAudio();
       }
       if (!this.audio.isPlaying) {
         this.audio.start();
