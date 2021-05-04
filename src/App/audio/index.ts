@@ -55,7 +55,7 @@ export class AudioProcessor {
     }
     return {
       duration: this.audio?.duration,
-      currentTime: currentTime - this.offset,
+      currentTime: currentTime - this.offset, // fix bugs for different case of currentTime
       frequency,
     }
   };
