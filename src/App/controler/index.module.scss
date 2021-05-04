@@ -1,0 +1,20 @@
+.container{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  & .controler {
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background-color: rgb(40, 44, 52);
+    opacity: 0.8;
+    display: grid;
+    justify-items: center;
+    grid-template-rows: 50% 10% 40%;
+    grid-gap: 10px;
+    color: rgba(97, 218, 251, 0.8);
+    overflow: hidden;
+  }
+}

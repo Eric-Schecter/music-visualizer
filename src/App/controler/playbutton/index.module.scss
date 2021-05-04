@@ -1,0 +1,49 @@
+.button {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  & .play {
+    border-left: 50px solid currentColor;
+    border-top: 25px solid transparent;
+    border-bottom: 25px solid transparent;
+  }
+
+  & .stop {
+    width:20px;
+    height:50px;
+    border-left:3px solid currentColor;
+    border-right:3px solid currentColor;
+  }
+
+  & .loading{
+    border: 1px solid currentColor;
+    width:50px;
+    height:50px;
+    border-radius: 50%;
+    animation: scale 3s linear infinite;
+  }
+}
+
+@keyframes scale{
+  0%{
+    transform: scale(1);
+  }
+  25%{
+    transform: scale(1.5);
+  }
+  50%{
+    transform: scale(1);
+  }
+  75%{
+    transform: scale(0.5);
+  }
+  100%{
+    transform: scale(1);
+  }
+}
