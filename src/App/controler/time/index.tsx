@@ -15,11 +15,13 @@ export const Time = ({ time }: Props) => {
     }
     const timer = setInterval(() => {
       if (!time.current) { return }
-      const { currentTime } = time.current;
+      const { currentTime,duration } = time.current;
       const curr = ~~currentTime;
+      const dura = ~~duration;
       reftime.current = curr;
-      const minute = ~~(curr / 60);
-      const second = curr % 60;
+      const divided = curr % dura || 0 ;
+      const minute = ~~(divided / 60);
+      const second = divided % 60;
       setProgress(`${handleTime(minute)}:${handleTime(second)}`);
     }, 300);
     return () => clearInterval(timer);
