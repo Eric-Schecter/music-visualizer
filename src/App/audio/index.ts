@@ -40,6 +40,7 @@ export class AudioProcessor {
     this._status = new Promise(async(resolve)=>{
       if (!this.audio) {
         this.audio = await this.initAudio();
+        this.time = Date.now();
       }
       if (!this.audio.isPlaying) {
         this.audio.start();
@@ -52,7 +53,7 @@ export class AudioProcessor {
   }
   public getData() {
     const { frequency, currentTime } = this.analyser.getData();
-    if (!this.audio || !this.audio?.isStart) {
+    if (!this.audio?.isStart) {
       this.offset = (Date.now() - this.time) / 1000;
     }
     console.log(this.offset,currentTime,currentTime-this.offset)
