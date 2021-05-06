@@ -19,7 +19,7 @@ export class AudioProcessor {
   private offset = 0;
   private isStart = true;
   private data?: string | ArrayBuffer;
-  constructor(outputSize = 2048) {
+  constructor(outputSize = 2048, private cb: () => any) {
     const fft = getfft(outputSize);
     this.context = new AudioContext();
     this.analyser = new Analyser(this.context, fft, outputSize);
@@ -30,11 +30,18 @@ export class AudioProcessor {
     if (!this.audio) {
       this.audio = new Audio(this.context);
     }
+    this.init(this.audio);
     this.response = await this.getAudioFile(data);
     await this.audio.decode(this.response, this.analyser.analyser, isFirst);
-    this.audio.reset();
-    this.offset = this.analyser.getData().currentTime;
+    this.cb();
     return this.audio;
+  }
+  private init = (audio: Audio) => {
+    this.cb();
+    audio.reset();
+    audio.pause();
+    this.offset = this.analyser.getData().currentTime;
+    this.isStart = true;
   }
   private getAudioFile = (data: string | ArrayBuffer) => {
     if (typeof data === 'string') {
@@ -61,7 +68,7 @@ export class AudioProcessor {
         this.audio = await this.load(this.data);
       }
       if (!this.audio.isReady) {
-        resolve('stop');
+        resolve('loading');
       } else if (!this.audio.isPlaying) {
         this.audio.start();
         resolve('start');

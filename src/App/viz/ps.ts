@@ -1,7 +1,6 @@
-import { Scene, Vector3, TextureLoader, BufferGeometry, Points, PointsMaterial, Float32BufferAttribute, AdditiveBlending, Material } from "three";
+import { Scene, Vector3, BufferGeometry, Points, PointsMaterial, Float32BufferAttribute, AdditiveBlending, Material, WebGLRenderer } from "three";
 
 class Particle {
-  public static texture = new TextureLoader().load('textures/snowflake2.png');
   private life = Math.random() * 250 + 250;
   private _instance: Points;
   private p = new Vector3();
@@ -57,7 +56,7 @@ class Particle {
 export class ParticleSystem {
   private observers = new Set<Particle>();
   private preData: number[] = [];
-  constructor(private scene: Scene, private radius: number) { }
+  constructor(private scene: Scene, private radius: number) {  }
   public add = (radian: number, force: number) => {
     const particle = new Particle(radian + Math.PI / 2, force, this.radius);
     this.observers.add(particle);
@@ -95,7 +94,6 @@ export class ParticleSystem {
     });
   }
   public dispose = () => {
-    Particle.texture.dispose();
     this.observers.forEach(observer => observer.dispose());
   }
 }

@@ -6,7 +6,7 @@ import { resizeRendererToDisplaySize } from './resize';
 import { AudioProcessor } from '../audio';
 import { Visualizer } from './visualizer';
 import { MyCamera } from './camera';
-import { ParticleSystem } from './particleSystem';
+import { ParticleSystem } from './ps';
 import { Renderer } from './renderer';
 import { MyScene } from './scene';
 import { Background } from './background';
@@ -28,7 +28,9 @@ export class Viz {
     this.camera = new MyCamera().instance;
     this.composer = this.initComposer();
     const radius = 30;
-    this.ps = new ParticleSystem(this.scene, radius);
+    // this.ps = new ParticleSystem(this.renderer,this.scene);
+
+    this.ps = new ParticleSystem(this.scene,radius);
     this.visualizer = new Visualizer(this.scene, radius);
     this.background = new Background(this.scene);
     this.update();
@@ -61,9 +63,6 @@ export class Viz {
     this.visualizer.dispose();
     this.background.dispose();
   }
-  // public click = () =>{
-  //   return this.audio.start();
-  // }
   public get data() {
     return this._data;
   }

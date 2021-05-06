@@ -9,9 +9,10 @@ export type Props = {
   time: RefObject<TimeType>,
   info?: InfoType,
   click: () => Promise<Status>,
+  isReset:boolean,
 }
 
-export const Controler = ({ time, info, click }: Props) => {
+export const Controler = ({ time, info, click,isReset }: Props) => {
   const [scale, setScale] = useState(1);
   useEffect(() => {
     const change = () => {
@@ -26,7 +27,7 @@ export const Controler = ({ time, info, click }: Props) => {
     <div className={styles.controler} style={{ transform: `scale(${scale})` }}>
       <Info info={info} />
       <Time time={time} />
-      <PlayButton click={click} />
+      <PlayButton click={click} isReset={isReset} />
     </div>
   </div>
 }

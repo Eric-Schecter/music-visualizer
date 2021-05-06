@@ -13,5 +13,6 @@ export type InfoType = {
 }
 
 export type Status =
-| 'stop'
-| 'start'
+  | 'stop'
+  | 'start'
+  | 'loading'

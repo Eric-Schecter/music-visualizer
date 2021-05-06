@@ -7,18 +7,19 @@ import { TimeType, InfoType } from '../shared/types';
 
 const useAudio = () => {
   const [info, setInfo] = useState<InfoType>();
-  const refAudio = useRef<AudioProcessor>(new AudioProcessor(360));
+  const [isReset, setIsReset] = useState(false);
+  const refAudio = useRef<AudioProcessor>(new AudioProcessor(360, () => setIsReset(pre => !pre)));
   const loadMusic = useCallback((url: string | ArrayBuffer) => {
     refAudio.current.load(url);
     refAudio.current.getmetadata().then(d => d && setInfo(d));
   }, [])
-  return { info, loadMusic, refAudio };
+  return { info, loadMusic, refAudio, isReset };
 }
 
 export const App = () => {
   const ref = useRef<HTMLCanvasElement>(null);
   const refData = useRef<TimeType>({ currentTime: 0, duration: 0 });
-  const { info, loadMusic, refAudio } = useAudio();
+  const { info, loadMusic, refAudio, isReset } = useAudio();
   useEffect(() => {
     if (!ref.current) { return }
     loadMusic('music.mp3');
@@ -52,6 +53,6 @@ export const App = () => {
     onDragOver={dragover}
   >
     <canvas ref={ref} className={styles.canvas} />
-    <Controler time={refData} info={info} click={refAudio.current.start} />
+    <Controler time={refData} info={info} click={refAudio.current.start} isReset={isReset} />
   </div>
 }

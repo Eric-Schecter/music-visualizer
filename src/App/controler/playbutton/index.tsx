@@ -1,13 +1,15 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from './index.module.scss';
 import { Status } from "../../../shared/types";
 
 type Props = {
   click: () => Promise<Status>,
+  isReset: boolean,
 }
 
-export const PlayButton = ({ click }: Props) => {
+export const PlayButton = ({ click, isReset }: Props) => {
   const [state, setState] = useState<Status | 'loading'>('stop');
+  
   const ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleClick = () => {
     ref.current && clearTimeout(ref.current);
@@ -19,6 +21,9 @@ export const PlayButton = ({ click }: Props) => {
       setState(s)
     });
   }
+  useEffect(() => {
+    setState('stop');
+  }, [isReset])
   return <div className={styles.button} onClick={handleClick}>
     {state === 'start'
       ? <div className={styles.stop} />

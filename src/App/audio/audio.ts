@@ -5,19 +5,20 @@ export class Audio {
   constructor(private context: AudioContext) {
     this.source = this.context.createBufferSource();
   }
-  private connect = (buffer: AudioBuffer, analyser: AudioNode,isFirst:boolean) => {
+  private connect = (buffer: AudioBuffer, analyser: AudioNode, isFirst: boolean) => {
     if (!isFirst) {
       this.source.disconnect();
       this.source = this.context.createBufferSource();
-      analyser.connect(this.context.destination);
     }
     this.source.buffer = buffer;
     this.source.loop = true;
     this.source.connect(analyser);
+    analyser.connect(this.context.destination);
   }
-  public decode = async (response: ArrayBuffer, analyser: AudioNode,isFirst:boolean) => {
+  public decode = async (response: ArrayBuffer, analyser: AudioNode, isFirst: boolean) => {
+    this._isReady = false;
     const buffer = await this.context.decodeAudioData(response, buffer => buffer);
-    this.connect(buffer, analyser,isFirst);
+    this.connect(buffer, analyser, isFirst);
     this._isReady = true;
   }
   public start = () => {
@@ -45,7 +46,7 @@ export class Audio {
   public get isStart() {
     return this._isStart;
   }
-  public set isStart(state:boolean){
+  public set isStart(state: boolean) {
     this._isStart = state;
   }
   public get isReady() {
