@@ -4,53 +4,76 @@ import { Analyser } from "./analyser";
 import { getfft } from "./getfft";
 import { Status } from '../../shared/types';
 
+type Metadata = {
+  cover: mm.IPicture | null;
+  album: string;
+  artist: string;
+  title: string;
+}
+
 export class AudioProcessor {
-  private response: Promise<ArrayBuffer>;
+  private response?: ArrayBuffer;
   private audio?: Audio;
   private analyser: Analyser;
   private context: AudioContext;
   private offset = 0;
-  private _status: Promise<Status> = Promise.resolve('stop');
-  constructor(private url: string, outputSize = 2048) {
-    this.response = this.getAudioFile(url);
+  private isStart = true;
+  private data?: string | ArrayBuffer;
+  constructor(outputSize = 2048) {
     const fft = getfft(outputSize);
     this.context = new AudioContext();
     this.analyser = new Analyser(this.context, fft, outputSize);
   }
-  private getAudioFile = (url: string) => {
-    const request = new XMLHttpRequest();
-    request.open('GET', url, true);
-    request.responseType = 'arraybuffer';
-    const response: Promise<ArrayBuffer> = new Promise((resolve, reject) => {
-      request.onload = () => resolve(request.response);
-      request.onerror = () => reject('load music fail');
-    })
-    request.send();
-    return response;
+  public load = async (data: string | ArrayBuffer) => {
+    this.data = data;
+    const isFirst = !this.audio;
+    if (!this.audio) {
+      this.audio = new Audio(this.context);
+    }
+    this.response = await this.getAudioFile(data);
+    await this.audio.decode(this.response, this.analyser.analyser, isFirst);
+    this.audio.reset();
+    this.offset = this.analyser.getData().currentTime;
+    return this.audio;
   }
-  private initAudio = async () => {
-    const audio = new Audio(this.analyser, this.context);
-    const res = await this.response;
-    await audio.decode(res);
-    return audio;
+  private getAudioFile = (data: string | ArrayBuffer) => {
+    if (typeof data === 'string') {
+      const request = new XMLHttpRequest();
+      request.open('GET', data, true);
+      request.responseType = 'arraybuffer';
+      const response: Promise<ArrayBuffer> = new Promise((resolve, reject) => {
+        request.onload = () => resolve(request.response);
+        request.onerror = () => reject('load music fail');
+      })
+      request.send();
+      return response;
+    }
+    return data;
   }
-  public start = async () => {
-    this._status = new Promise(async (resolve) => {
+  public start = async (): Promise<Status> => {
+    this.isStart = false;
+    return new Promise(async (resolve) => {
       if (!this.audio) {
-        this.audio = await this.initAudio();
+        if (!this.data) {
+          resolve('stop');
+          return;
+        }
+        this.audio = await this.load(this.data);
       }
-      if (!this.audio.isPlaying) {
+      if (!this.audio.isReady) {
+        resolve('stop');
+      } else if (!this.audio.isPlaying) {
         this.audio.start();
         resolve('start');
       } else {
-        this.audio.stop();
+        this.audio.pause();
         resolve('stop');
       }
     });
   }
   public getData() {
     const { frequency, currentTime } = this.analyser.getData();
-    if (!this.audio) {
+    if (this.isStart) {
       this.offset = currentTime;
     }
     return {
@@ -59,16 +82,25 @@ export class AudioProcessor {
       frequency,
     }
   };
-  public getmetadata = () => {
-    return mm.fetchFromUrl(this.url).then(d => {
+  private arrayBuffer2buffer = (data: ArrayBuffer) => {
+    const buffer = Buffer.alloc(data.byteLength);
+    const view = new Uint8Array(data);
+    for (let i = 0; i < buffer.length; i++) {
+      buffer[i] = view[i];
+    }
+    return buffer;
+  }
+  public getmetadata = (): Promise<Metadata | null> => {
+    if (!this.data) { return new Promise((resolve) => resolve(null)) }
+    const data = typeof this.data === 'string'
+      ? mm.fetchFromUrl(this.data)
+      : mm.parseBuffer(this.arrayBuffer2buffer(this.data))
+    return data.then(d => {
       const { picture, album = '', artist = '', title = '' } = d.common;
       const cover = mm.selectCover(picture);
       return {
         cover, album, artist, title,
       }
     })
-  }
-  public get status() {
-    return this._status;
   }
 }

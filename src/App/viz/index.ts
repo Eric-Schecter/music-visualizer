@@ -61,10 +61,9 @@ export class Viz {
     this.visualizer.dispose();
     this.background.dispose();
   }
-  public click = () =>{
-    this.audio.start();
-    return this.audio.status;
-  }
+  // public click = () =>{
+  //   return this.audio.start();
+  // }
   public get data() {
     return this._data;
   }

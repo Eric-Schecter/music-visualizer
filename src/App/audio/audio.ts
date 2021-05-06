@@ -1,34 +1,37 @@
-import { Analyser } from "./analyser";
-
 export class Audio {
   private source: AudioBufferSourceNode;
-  private _isStart = false;
-  private buffer?: AudioBuffer;
-  constructor(private analyser: Analyser, private context: AudioContext) {
+  private _isStart = true;
+  private _isReady = false;
+  constructor(private context: AudioContext) {
     this.source = this.context.createBufferSource();
   }
-
-  private connect = (buffer: AudioBuffer) => {
+  private connect = (buffer: AudioBuffer, analyser: AudioNode,isFirst:boolean) => {
+    if (!isFirst) {
+      this.source.disconnect();
+      this.source = this.context.createBufferSource();
+      analyser.connect(this.context.destination);
+    }
     this.source.buffer = buffer;
     this.source.loop = true;
-    const analyser = this.analyser.analyser;
     this.source.connect(analyser);
-    analyser.connect(this.context.destination);
   }
-  public decode = async (response: ArrayBuffer) => {
-    this.buffer = await this.context.decodeAudioData(response, buffer => buffer);
-    this.connect(this.buffer);
+  public decode = async (response: ArrayBuffer, analyser: AudioNode,isFirst:boolean) => {
+    const buffer = await this.context.decodeAudioData(response, buffer => buffer);
+    this.connect(buffer, analyser,isFirst);
+    this._isReady = true;
   }
   public start = () => {
-    if (this._isStart) {
-      this.context.resume();
-      return;
+    if (!this._isStart) {
+      this.source.start(0);
+      this._isStart = true;
     }
-    this.source.start(0);
-    this._isStart = true;
+    this.context.resume();
   }
-  public stop = () => {
+  public pause = () => {
     this.context.suspend();
+  }
+  public reset = () => {
+    this._isStart = false;
   }
   public get isPlaying() {
     if (!this._isStart) {
@@ -37,9 +40,15 @@ export class Audio {
     return this.context.state === 'running';
   }
   public get duration() {
-    return this.buffer?.duration;
+    return this.source.buffer?.duration;
   }
-  public get isStart(){
+  public get isStart() {
     return this._isStart;
+  }
+  public set isStart(state:boolean){
+    this._isStart = state;
+  }
+  public get isReady() {
+    return this._isReady;
   }
 }

@@ -8,7 +8,7 @@ import { TimeType, InfoType, Status } from "../../shared/types";
 export type Props = {
   time: RefObject<TimeType>,
   info?: InfoType,
-  click: RefObject<() => Promise<Status>>,
+  click: () => Promise<Status>,
 }
 
 export const Controler = ({ time, info, click }: Props) => {
