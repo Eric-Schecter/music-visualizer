@@ -9,10 +9,10 @@ export type Props = {
   time: RefObject<TimeType>,
   info?: InfoType,
   click: () => Promise<Status>,
-  isReset:boolean,
+  isReset: boolean,
 }
 
-export const Controler = ({ time, info, click,isReset }: Props) => {
+export const Controler = ({ time, info, click, isReset }: Props) => {
   const [scale, setScale] = useState(1);
   useEffect(() => {
     const change = () => {

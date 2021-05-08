@@ -8,7 +8,7 @@ type Props = {
 }
 
 export const PlayButton = ({ click, isReset }: Props) => {
-  const [state, setState] = useState<Status | 'loading'>('stop');
+  const [state, setState] = useState<Status>('stop');
   
   const ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleClick = () => {
