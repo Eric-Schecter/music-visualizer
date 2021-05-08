@@ -1,14 +1,14 @@
 uniform sampler2D textureParams;
 
 vec4 friction(vec4 v){
-  return length(v)>1.?-v *.1:vec4(0.);
+  return -v *.05;
 }
 
 vec3 force(vec2 uv,vec4 params){
   vec2 initPos=params.xy;
   vec2 originPos=vec2(0.);
   vec2 direction=normalize(initPos-originPos);
-  return vec3(direction*params.z*.2,.1);
+  return vec3(direction*params.z*.05,.03);
 }
 
 void main(){
