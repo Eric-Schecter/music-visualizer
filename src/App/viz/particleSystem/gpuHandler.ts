@@ -1,57 +1,62 @@
 import { GPUComputationRenderer, Variable } from "three/examples/jsm/misc/GPUComputationRenderer";
-import { IUniform, WebGLRenderer, DataTexture, RepeatWrapping, RGBAFormat, Vector2 } from "three";
+import { IUniform, WebGLRenderer, RepeatWrapping, Texture, DataTexture, RGBAFormat, Clock, FloatType} from "three";
 import { fragmentPos, fragmentVelocity } from "./shaders";
 
 export class GPUHandler {
   private gpuCompute: GPUComputationRenderer;
   private positionVariable: Variable;
   private velocityVariable: Variable;
-  private velocityUniforms: { [uniform: string]: IUniform<any> } = {};
-  constructor(size: number, renderer: WebGLRenderer) {
+  private index = 0;
+  private dataTexture: DataTexture;
+  private velocityUniforms: { [uniform: string]: IUniform<Texture> } = {};
+  private positionUniforms: { [uniform: string]: IUniform<Texture | number> } = {};
+  constructor(size: number, renderer: WebGLRenderer, private uniforms: { [uniform: string]: IUniform<Texture> },
+    private clock: Clock) {
     this.gpuCompute = new GPUComputationRenderer(size, size, renderer);
     const currPos = this.gpuCompute.createTexture();
-    const currVelocity = this.initVelocity();
+    const currVelocity = this.gpuCompute.createTexture();
     this.positionVariable = this.gpuCompute.addVariable("texturePosition", fragmentPos, currPos);
     this.velocityVariable = this.gpuCompute.addVariable("textureVelocity", fragmentVelocity, currVelocity);
-    this.setupGpgpu(size);
-  }
-  private initVelocity = () => {
-    const velocity = this.gpuCompute.createTexture();
-    const range = 1000;
-    const length = velocity.image.data.length;
-    const generate = () => Math.random() * range - range / 2;
-    for (let i = 0; i < length; i += 4) {
-      velocity.image.data.set(new Array(3).fill(0).map(() => generate()), i);
-    }
-    return velocity;
-  }
-  private setupGpgpu = (size: number) => {
-    const initData = new Uint8Array(size * 4).fill(0);
-    const initDataTexture = new DataTexture(initData, size, size, RGBAFormat);
 
-    this.gpuCompute.setVariableDependencies(this.positionVariable, [this.positionVariable, this.velocityVariable]);
-    this.positionVariable.wrapS = RepeatWrapping;
-    this.positionVariable.wrapT = RepeatWrapping;
+    const initData = new Float32Array(size ** 2 * 4).fill(0);
+    this.dataTexture = new DataTexture(initData, size, size, RGBAFormat,FloatType);
 
-    this.gpuCompute.setVariableDependencies(this.velocityVariable, [this.positionVariable, this.velocityVariable]);
+    this.setupGpgpu();
+  }
+  private setDependency = (dependencies: Variable[]) => {
+    dependencies.forEach(dependency => {
+      this.gpuCompute.setVariableDependencies(dependency, dependencies);
+      dependency.wrapS = RepeatWrapping;
+      dependency.wrapT = RepeatWrapping;
+    })
+  }
+  private setupGpgpu = () => {
+    this.setDependency([this.positionVariable, this.velocityVariable]);
     this.velocityUniforms = this.velocityVariable.material.uniforms;
-    this.velocityUniforms.textureTargetPosition = { value: initDataTexture };
-    this.velocityUniforms.uMouse = { value: new Vector2(-10000, -10000) };
-    this.velocityVariable.wrapS = RepeatWrapping;
-    this.velocityVariable.wrapT = RepeatWrapping;
-
+    this.positionUniforms = this.positionVariable.material.uniforms;
+    this.velocityUniforms.textureParams = { value: this.dataTexture };
+    this.positionUniforms.textureParams = { value: this.dataTexture };
+    this.positionUniforms.uTime = { value: 0 };
     const error = this.gpuCompute.init();
     if (error !== null) {
       console.error(error);
     }
   }
-  public update = (uniforms: { [uniform: string]: IUniform<any> }, mouse: Vector2) => {
+  public update = () => {
     this.gpuCompute.compute();
-    uniforms.texturePosition.value = (this.gpuCompute.getCurrentRenderTarget(this.positionVariable) as any).texture;
-    uniforms.textureVelocity.value = (this.gpuCompute.getCurrentRenderTarget(this.velocityVariable) as any).texture;
-    this.velocityUniforms.uMouse.value.set(mouse.x, -mouse.y);
+    this.uniforms.texturePosition.value = (this.gpuCompute.getCurrentRenderTarget(this.positionVariable) as any).texture;
+    this.uniforms.textureVelocity.value = (this.gpuCompute.getCurrentRenderTarget(this.velocityVariable) as any).texture;
+    this.positionUniforms.uTime.value = this.clock.elapsedTime;
   }
-  public updateTargetPos = (data: DataTexture) => {
-    this.velocityUniforms.textureTargetPosition.value = data;
+  public emit = (x: number, y: number, force: number) => {
+    this.dataTexture.image.data.set([x, y, force, this.clock.elapsedTime], this.index);
+    const texture = this.dataTexture.clone();
+    this.uniforms.textureParams.value = texture;
+    this.velocityUniforms.textureParams.value = texture;
+    this.positionUniforms.textureParams.value = texture;
+    this.index += 4;
+    if (this.index > texture.image.data.length - 1) {
+      this.index = 0;
+    }
   }
 }

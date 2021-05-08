@@ -1,4 +1,3 @@
-varying vec2 vUv;
 varying vec3 vPos;
 varying float vFrequency;
 varying vec3 vNormal;
