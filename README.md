@@ -3,7 +3,8 @@
 </p>
 
 ## About The Project
-A visualizer for music
+A visualizer for music.  
+Drop your music file to change song.  
 
 ## Get Started
 #### Run Online   
