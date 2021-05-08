@@ -28,9 +28,7 @@ export class Viz {
     this.camera = new MyCamera().instance;
     this.composer = this.initComposer();
     const radius = 30;
-    this.ps = new ParticleSystem(this.renderer,this.scene);
-
-    // this.ps = new ParticleSystem(this.scene,radius);
+    this.ps = new ParticleSystem(this.renderer,this.scene,radius);
     this.visualizer = new Visualizer(this.scene, radius);
     this.background = new Background(this.scene);
     this.update();
