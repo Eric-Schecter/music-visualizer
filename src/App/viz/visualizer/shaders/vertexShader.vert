@@ -11,7 +11,7 @@ vec3 addVolume(vec3 pos){
   vec3 offset=vec3(cos(aRadian),sin(aRadian),0.)*(radius - 1.);
   pos-=offset;
   float val=aFrequency/2.;
-  float scale=max(length(vec2(val*cos(aRadian),val*sin(aRadian)))/2.,.1);
+  float scale=max(length(vec2(val*cos(aRadian),val*sin(aRadian)))/3.,.1);
   pos*=scale;
   pos+=vec3(cos(aRadian),sin(aRadian),0.)*scale;
   pos+=offset;
@@ -25,5 +25,4 @@ void main(){
   vFrequency=min(10.,aFrequency);
   vPos=pos;
   gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.);
-  
 }
