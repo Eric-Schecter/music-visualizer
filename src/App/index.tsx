@@ -44,6 +44,8 @@ export const App = () => {
           const res = e.target?.result;
           res && loadMusic(res);
         }
+      }else{
+        console.log('not supported')
       }
     }
   }
