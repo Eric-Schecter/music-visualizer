@@ -8,7 +8,7 @@ export class GPUHandler {
   private velocityVariable: Variable;
   private index = 0;
   private dataTexture: DataTexture;
-  private velocityUniforms: { [uniform: string]: IUniform<Texture> } = {};
+  private velocityUniforms: { [uniform: string]: IUniform<Texture | number> } = {};
   private positionUniforms: { [uniform: string]: IUniform<Texture | number> } = {};
   constructor(size: number, renderer: WebGLRenderer, private uniforms: { [uniform: string]: IUniform<Texture> },
     private clock: Clock) {
@@ -36,6 +36,7 @@ export class GPUHandler {
     this.positionUniforms = this.positionVariable.material.uniforms;
     this.velocityUniforms.textureParams = { value: this.dataTexture };
     this.positionUniforms.textureParams = { value: this.dataTexture };
+    this.velocityUniforms.uTime = { value: 0 };
     this.positionUniforms.uTime = { value: 0 };
     const error = this.gpuCompute.init();
     if (error !== null) {
@@ -47,16 +48,17 @@ export class GPUHandler {
     this.uniforms.texturePosition.value = (this.gpuCompute.getCurrentRenderTarget(this.positionVariable) as any).texture;
     this.uniforms.textureVelocity.value = (this.gpuCompute.getCurrentRenderTarget(this.velocityVariable) as any).texture;
     this.positionUniforms.uTime.value = this.clock.elapsedTime;
+    this.velocityUniforms.uTime.value = this.clock.elapsedTime;
   }
   public emit = (particles: { x: number, y: number, force: number }[]) => {
-    const texture = this.dataTexture.clone();
     particles.forEach(({ x, y, force }) => {
       this.dataTexture.image.data.set([x, y, force, this.clock.elapsedTime], this.index);
       this.index += 4;
-      if (this.index > texture.image.data.length - 1) {
+      if (this.index > this.dataTexture.image.data.length - 1) {
         this.index = 0;
       }
     })
+    const texture = this.dataTexture.clone();
     this.uniforms.textureParams.value = texture;
     this.velocityUniforms.textureParams.value = texture;
     this.positionUniforms.textureParams.value = texture;
