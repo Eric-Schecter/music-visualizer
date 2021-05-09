@@ -1,5 +1,5 @@
 import { GPUComputationRenderer, Variable } from "three/examples/jsm/misc/GPUComputationRenderer";
-import { IUniform, WebGLRenderer, RepeatWrapping, Texture, DataTexture, RGBAFormat, Clock, FloatType} from "three";
+import { IUniform, WebGLRenderer, RepeatWrapping, Texture, DataTexture, RGBAFormat, Clock, FloatType } from "three";
 import { fragmentPos, fragmentVelocity } from "./shaders";
 
 export class GPUHandler {
@@ -19,7 +19,7 @@ export class GPUHandler {
     this.velocityVariable = this.gpuCompute.addVariable("textureVelocity", fragmentVelocity, currVelocity);
 
     const initData = new Float32Array(size ** 2 * 4).fill(0);
-    this.dataTexture = new DataTexture(initData, size, size, RGBAFormat,FloatType);
+    this.dataTexture = new DataTexture(initData, size, size, RGBAFormat, FloatType);
 
     this.setupGpgpu();
   }
@@ -48,15 +48,17 @@ export class GPUHandler {
     this.uniforms.textureVelocity.value = (this.gpuCompute.getCurrentRenderTarget(this.velocityVariable) as any).texture;
     this.positionUniforms.uTime.value = this.clock.elapsedTime;
   }
-  public emit = (x: number, y: number, force: number) => {
-    this.dataTexture.image.data.set([x, y, force, this.clock.elapsedTime], this.index);
+  public emit = (particles: { x: number, y: number, force: number }[]) => {
     const texture = this.dataTexture.clone();
+    particles.forEach(({ x, y, force }) => {
+      this.dataTexture.image.data.set([x, y, force, this.clock.elapsedTime], this.index);
+      this.index += 4;
+      if (this.index > texture.image.data.length - 1) {
+        this.index = 0;
+      }
+    })
     this.uniforms.textureParams.value = texture;
     this.velocityUniforms.textureParams.value = texture;
     this.positionUniforms.textureParams.value = texture;
-    this.index += 4;
-    if (this.index > texture.image.data.length - 1) {
-      this.index = 0;
-    }
   }
 }

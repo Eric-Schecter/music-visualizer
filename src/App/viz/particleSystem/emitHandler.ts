@@ -5,15 +5,17 @@ export class EmitHandler {
   constructor(private gpuHandler: GPUHandler,private radius:number) { }
   private generateParticle = (data: number[]) => {
     const limit = 3;
+    const particles = [];
     for (let i = 0; i < data.length; i += 5) {
       if (data[i] > this.preData[i] + limit) {
         const radian = i / 180 * Math.PI + (Math.random() - 0.5) * 90 * Math.PI;
         const force = (data[i] - this.preData[i]);
         const x = Math.cos(radian) * this.radius;
         const y = Math.sin(radian) * this.radius;
-        this.gpuHandler.emit(x,y, force)
+        particles.push({x,y,force});
       }
     }
+    this.gpuHandler.emit(particles);
     this.preData = data.slice();
   }
   private checkData = (data: number[]) => {
