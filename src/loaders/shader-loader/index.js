@@ -19,7 +19,9 @@ var replace = function (match, file) {
     }
     var str = '';
     if (fs_1.default.existsSync(src)) {
-        str = fs_1.default.readFileSync(src, { encoding: 'utf-8' });
+        var content = fs_1.default.readFileSync(src, { encoding: 'utf-8' }).trim();
+        var strArr = content.split('\n');
+        str = strArr.join('');
         table.set(src, str);
     }
     return handleInclude(str);

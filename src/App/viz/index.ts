@@ -4,33 +4,26 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { resizeRendererToDisplaySize } from './resize';
 import { AudioProcessor } from '../audio';
-import { Visualizer } from './visualizer';
 import { MyCamera } from './camera';
-import { ParticleSystem } from './particleSystem';
 import { Renderer } from './renderer';
 import { MyScene } from './scene';
-import { Background } from './background';
+import { Player } from './player';
 
 export class Viz {
   private scene: Scene;
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
-  private visualizer: Visualizer;
-  private ps: ParticleSystem;
   private composer: EffectComposer;
-  private background: Background;
   private clock = new Clock();
   private _data = { currentTime: 0, duration: 0 };
+  private player: Player;
 
   constructor(canvas: HTMLCanvasElement, private audio: AudioProcessor) {
     this.renderer = new Renderer(canvas).instance;
     this.scene = new MyScene().instance;
     this.camera = new MyCamera().instance;
     this.composer = this.initComposer();
-    const radius = 30;
-    this.ps = new ParticleSystem(this.renderer,this.scene,radius);
-    this.visualizer = new Visualizer(this.scene, radius);
-    this.background = new Background(this.scene);
+    this.player = new Player(this.renderer, this.scene, this.clock);
     this.update();
   }
   private initComposer = () => {
@@ -49,17 +42,13 @@ export class Viz {
     this.composer.render();
     const { frequency, currentTime = 0, duration = 0 } = this.audio.getData();
     Object.assign(this._data, { currentTime, duration });
-    this.visualizer.update(frequency, time);
-    this.background.update(time);
-    this.ps.update(frequency);
+    this.player.update(frequency, time);
     resizeRendererToDisplaySize(this.renderer, this.camera, this.composer);
     requestAnimationFrame(this.update);
   }
   public unregister = () => {
     this.renderer.dispose();
-    // this.ps.dispose();
-    this.visualizer.dispose();
-    this.background.dispose();
+    this.player.dispose();
   }
   public get data() {
     return this._data;

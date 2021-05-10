@@ -1,6 +1,6 @@
 import {
   InstancedBufferGeometry, ShaderMaterial, Mesh, InstancedBufferAttribute,
-  UniformsUtils, WebGLRenderer, IUniform, BoxBufferGeometry, Scene, Clock
+  UniformsUtils, WebGLRenderer, IUniform, BoxBufferGeometry, Scene, Clock, BufferAttribute
 } from "three";
 import { vertexShader, fragmentShader } from './shaders';
 import { GPUHandler } from "./gpuHandler";
@@ -9,15 +9,19 @@ export class ParticleSystem {
   private uniforms: { [uniform: string]: IUniform<any> } = {};
   private gpuHandler: GPUHandler;
   private emitHandler: EmitHandler;
-  private clock = new Clock();
-  constructor(renderer: WebGLRenderer, scene: Scene,radius:number) {
+  private geo: InstancedBufferGeometry;
+  private mat: ShaderMaterial;
+  private _instance: Mesh;
+  constructor(renderer: WebGLRenderer, scene: Scene, radius: number, private clock: Clock,
+    private frequencies: BufferAttribute, private radialSegments: number, private tubularSegments: number) {
+    this.frequencies = new BufferAttribute(new Float32Array((this.radialSegments + 1) * (this.tubularSegments + 1)), 1);
     const size = 128;
-    const geo = this.setupGeometry(size);
-    const mat = this.setupMaterial();
-    const mesh = new Mesh(geo, mat);
-    scene.add(mesh);
+    this.geo = this.setupGeometry(size);
+    this.mat = this.setupMaterial();
+    this._instance = new Mesh(this.geo, this.mat);
+    scene.add(this._instance);
     this.gpuHandler = new GPUHandler(size, renderer, this.uniforms, this.clock);
-    this.emitHandler = new EmitHandler(this.gpuHandler,radius);
+    this.emitHandler = new EmitHandler(this.gpuHandler, radius);
   }
   private setReference = (cnt: number, size: number) => {
     const references = new InstancedBufferAttribute(new Float32Array(cnt * 2), 2);
@@ -41,6 +45,7 @@ export class ParticleSystem {
     geo.setAttribute('uv', uv);
     geo.setIndex(indices === undefined ? [] : indices);
     geo.setAttribute('reference', this.setReference(size ** 2, size));
+    geo.setAttribute('aFrequency', this.frequencies);
     return geo;
   }
   private setupMaterial = () => {
@@ -57,9 +62,14 @@ export class ParticleSystem {
       transparent: true,
     });
   }
-  public update = (frequency: number[]) => {
+  public update = (frequency: number[], time: number) => {
+    (this._instance.material as any).uniforms.uTime.value = time;
     this.gpuHandler.update();
     this.emitHandler.update(frequency);
     this.uniforms.uTime.value = this.clock.getElapsedTime();
+  }
+  public dispose = () => {
+    this.geo.dispose();
+    this.mat.dispose();
   }
 }
