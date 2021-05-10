@@ -1,9 +1,8 @@
 varying vec3 vPos;
 varying float vFrequency;
-varying vec3 vNormal;
 uniform float uTime;
 
-const float PI=3.14159265359;
+const float PI = 3.14159265359;
 
 const vec3 hemiLight_g_1=vec3(229/255,0,97/255);
 const vec3 hemiLight_s_1=vec3(239/255,203/255,3/255);
@@ -55,8 +54,8 @@ vec3 calcDirColor(vec3 _normal){
 
 void main(){
   vec3 _normal=normalize(cross(dFdx(vPos),dFdy(vPos)));
-  vec3 hemiColor=calcHemiColor(vNormal);
-  vec3 dirColor=calcDirColor(vNormal);
+  vec3 hemiColor=calcHemiColor(_normal);
+  vec3 dirColor=calcDirColor(_normal);
   
   vec3 color=vec3(1.);
   color*=hemiColor;

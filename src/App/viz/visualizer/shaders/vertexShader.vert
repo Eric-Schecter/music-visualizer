@@ -3,7 +3,6 @@ attribute float aFrequency;
 uniform float radius;
 uniform float uTime;
 
-varying vec3 vNormal;
 varying vec3 vPos;
 varying float vFrequency;
 
@@ -21,7 +20,6 @@ vec3 addVolume(vec3 pos){
 void main(){
   vec3 pos=position.xyz;
   pos=addVolume(pos);
-  vNormal=normal;
   vFrequency=min(10.,aFrequency);
   vPos=pos;
   gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.);
