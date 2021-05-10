@@ -12,9 +12,7 @@ export class ParticleSystem {
   private geo: InstancedBufferGeometry;
   private mat: ShaderMaterial;
   private _instance: Mesh;
-  constructor(renderer: WebGLRenderer, scene: Scene, radius: number, private clock: Clock,
-    private frequencies: BufferAttribute, private radialSegments: number, private tubularSegments: number) {
-    this.frequencies = new BufferAttribute(new Float32Array((this.radialSegments + 1) * (this.tubularSegments + 1)), 1);
+  constructor(renderer: WebGLRenderer, scene: Scene, radius: number, private clock: Clock,private frequencies: BufferAttribute) {
     const size = 128;
     this.geo = this.setupGeometry(size);
     this.mat = this.setupMaterial();

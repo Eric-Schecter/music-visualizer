@@ -4,6 +4,7 @@ attribute vec2 reference;
 varying vec4 vParams;
 varying vec3 vPos;
 varying float vFrequency;
+attribute float aFrequency;
 
 void main(){
   vec3 pos=position.xyz;
@@ -11,6 +12,7 @@ void main(){
   vec4 params=texture2D(textureParams,reference);
   pos+=p.xyz;
   vParams=params;
-  vPos = pos;
+  vPos=pos;
+  vFrequency=aFrequency;
   gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.);
 }

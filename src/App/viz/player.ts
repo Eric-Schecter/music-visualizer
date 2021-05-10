@@ -13,9 +13,9 @@ export class Player {
   private tubularSegments = 360;
   constructor(renderer: WebGLRenderer, scene: Scene, clock: Clock) {
     this.frequencies = new BufferAttribute(new Float32Array((this.radialSegments + 1) * (this.tubularSegments + 1)), 1);
-    this.ps = new ParticleSystem(renderer, scene, this.radius, clock, this.frequencies, this.radialSegments, this.tubularSegments);
+    this.ps = new ParticleSystem(renderer, scene, this.radius, clock, this.frequencies);
     this.visualizer = new Visualizer(scene, this.radius, this.frequencies, this.radialSegments, this.tubularSegments);
-    this.background = new Background(scene);
+    this.background = new Background(scene,this.frequencies);
   }
   private updateFrequency = (frequency: number[]) => {
     this.frequencies.needsUpdate = true;

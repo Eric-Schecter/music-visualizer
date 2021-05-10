@@ -14,6 +14,7 @@ vec3 addVolume(vec3 pos){
   pos*=scale;
   pos+=vec3(cos(aRadian),sin(aRadian),0.)*scale;
   pos+=offset;
+  vFrequency = aFrequency;
   return pos;
 }
 
