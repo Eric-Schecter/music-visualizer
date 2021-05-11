@@ -14,5 +14,6 @@ void main(){
   vParams=params;
   vPos=pos;
   vFrequency=aFrequency;
+  gl_PointSize = 20.;
   gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.);
 }

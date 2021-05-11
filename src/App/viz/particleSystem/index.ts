@@ -1,6 +1,6 @@
 import {
   InstancedBufferGeometry, ShaderMaterial, Mesh, InstancedBufferAttribute,
-  UniformsUtils, WebGLRenderer, IUniform, BoxBufferGeometry, Scene, Clock, BufferAttribute
+  UniformsUtils, WebGLRenderer, IUniform, BoxBufferGeometry, Scene, Clock, BufferAttribute, BufferGeometry, Points
 } from "three";
 import { vertexShader, fragmentShader } from './shaders';
 import { GPUHandler } from "./gpuHandler";
@@ -9,20 +9,21 @@ export class ParticleSystem {
   private uniforms: { [uniform: string]: IUniform<any> } = {};
   private gpuHandler: GPUHandler;
   private emitHandler: EmitHandler;
-  private geo: InstancedBufferGeometry;
+  private geo: BufferGeometry;
   private mat: ShaderMaterial;
-  private _instance: Mesh;
-  constructor(renderer: WebGLRenderer, scene: Scene, radius: number, private clock: Clock,private frequencies: BufferAttribute) {
+  private _instance: Points;
+  constructor(renderer: WebGLRenderer, scene: Scene, radius: number, private clock: Clock, private frequencies: BufferAttribute) {
     const size = 128;
     this.geo = this.setupGeometry(size);
     this.mat = this.setupMaterial();
-    this._instance = new Mesh(this.geo, this.mat);
+    this._instance = new Points(this.geo, this.mat);
     scene.add(this._instance);
     this.gpuHandler = new GPUHandler(size, renderer, this.uniforms, this.clock);
     this.emitHandler = new EmitHandler(this.gpuHandler, radius);
   }
-  private setReference = (cnt: number, size: number) => {
-    const references = new InstancedBufferAttribute(new Float32Array(cnt * 2), 2);
+  private setReference = (size: number) => {
+    const cnt = size ** 2;
+    const references = new BufferAttribute(new Float32Array(cnt * 2), 2);
     for (let i = 0; i < cnt; i++) {
       const x = (i % size) / size;
       const y = ~~(i / size) / size;
@@ -31,18 +32,10 @@ export class ParticleSystem {
     return references;
   }
   private setupGeometry = (size: number) => {
-    const length = 0.3;
-    const originGeo = new BoxBufferGeometry(length, length, length);
-    const geo = new InstancedBufferGeometry();
-    const pos = originGeo.attributes.position.clone();
-    const normal = originGeo.attributes.normal.clone();
-    const uv = originGeo.attributes.uv.clone();
-    const indices = originGeo.index?.clone();
+    const geo = new BufferGeometry();
+    const pos = new BufferAttribute(new Float32Array(size ** 2 * 3), 3);
     geo.setAttribute('position', pos);
-    geo.setAttribute('normal', normal);
-    geo.setAttribute('uv', uv);
-    geo.setIndex(indices === undefined ? [] : indices);
-    geo.setAttribute('reference', this.setReference(size ** 2, size));
+    geo.setAttribute('reference', this.setReference(size));
     geo.setAttribute('aFrequency', this.frequencies);
     return geo;
   }
