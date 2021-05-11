@@ -17,6 +17,7 @@ export class Viz {
   private clock = new Clock();
   private _data = { currentTime: 0, duration: 0 };
   private player: Player;
+  private preTime = 0;
 
   constructor(canvas: HTMLCanvasElement, private audio: AudioProcessor) {
     this.renderer = new Renderer(canvas).instance;
@@ -37,13 +38,27 @@ export class Viz {
     composer.addPass(bloomPass);
     return composer;
   }
-  private update = () => {
-    const time = this.clock.getElapsedTime();
-    this.composer.render();
+  private needRender = (time: number) => {
+    const fpsInterval = 1 / 60;
+    const elapsed = time - this.preTime;
+    if (elapsed > fpsInterval) {
+      this.preTime = time - (elapsed % fpsInterval);
+      return true;
+    }
+    return false;
+  }
+  private draw = (time: number) => {
     const { frequency, currentTime = 0, duration = 0 } = this.audio.getData();
     Object.assign(this._data, { currentTime, duration });
     this.player.update(frequency, time);
+    this.composer.render();
     resizeRendererToDisplaySize(this.renderer, this.camera, this.composer);
+  }
+  private update = () => {
+    const time = this.clock.getElapsedTime();
+    if (this.needRender(time)) {
+      this.draw(time);
+    }
     requestAnimationFrame(this.update);
   }
   public unregister = () => {
