@@ -3,9 +3,9 @@ uniform float uTime;
 
 void main(){
   vec2 uv=gl_FragCoord.xy/resolution.xy;
-  vec4 params=texture2D(textureParams,uv);
-  vec4 p=texture2D(texturePosition,uv);
-  vec4 v=texture2D(textureVelocity,uv);
+  vec4 params=texture(textureParams,uv);
+  vec4 p=texture(texturePosition,uv);
+  vec4 v=texture(textureVelocity,uv);
   if(params.w!=0.&&uTime==params.w){
     p.xy=params.xy;
   }

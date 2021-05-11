@@ -1,5 +1,5 @@
-varying vec3 vPos;
-varying vec2 vUv;
+out vec3 vPos;
+out vec2 vUv;
 // varying float vFrequency;
 // attribute float aFrequency;
 

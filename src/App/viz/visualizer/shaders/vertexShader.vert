@@ -1,10 +1,10 @@
-attribute float aRadian;
-attribute float aFrequency;
+in float aRadian;
+in float aFrequency;
 uniform float radius;
 uniform float uTime;
 
-varying vec3 vPos;
-varying float vFrequency;
+out vec3 vPos;
+out float vFrequency;
 
 vec3 addVolume(vec3 pos){
   vec3 offset=vec3(cos(aRadian),sin(aRadian),0.)*(radius - 1.);

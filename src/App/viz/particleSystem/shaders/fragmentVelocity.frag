@@ -14,8 +14,8 @@ vec3 force(vec2 uv,vec4 params){
 
 void main(){
   vec2 uv=gl_FragCoord.xy/resolution.xy;
-  vec4 params=texture2D(textureParams,uv);
-  vec4 v=texture2D(textureVelocity,uv);
+  vec4 params=texture(textureParams,uv);
+  vec4 v=texture(textureVelocity,uv);
   bool alive=params.w!=0. && uTime-params.w < params.z;
   if(alive){
     v.xyz+=force(uv,params);

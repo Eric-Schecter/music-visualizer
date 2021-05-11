@@ -1,7 +1,7 @@
 uniform float uTime;
-varying vec4 vParams;
-varying vec3 vPos;
-varying float vFrequency;
+in vec4 vParams;
+in vec3 vPos;
+in float vFrequency;
 
 #include <lighteffect.glsl>;
 

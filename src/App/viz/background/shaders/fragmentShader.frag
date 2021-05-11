@@ -1,6 +1,6 @@
 uniform float uTime;
-varying vec3 vPos;
-varying vec2 vUv;
+in vec3 vPos;
+in vec2 vUv;
 
 #include <lighteffect.glsl>;
 
