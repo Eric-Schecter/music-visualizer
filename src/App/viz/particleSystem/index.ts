@@ -1,6 +1,6 @@
 import {
   ShaderMaterial, UniformsUtils, WebGLRenderer, IUniform, Scene, Clock, BufferAttribute,
-  AdditiveBlending, Points, BufferGeometry,
+  Points, BufferGeometry,
 } from "three";
 import { vertexShader, fragmentShader } from './shaders';
 import { GPUHandler } from "./gpuHandler";
@@ -48,10 +48,9 @@ export class ParticleSystem {
       fragmentShader,
       uniforms: this.uniforms,
       transparent: true,
-      blending: AdditiveBlending,
     });
   }
-  public update = (frequency:number[], time: number) => {
+  public update = (frequency: number[], time: number) => {
     this.uniforms.uTime.value = time;
     this.gpuHandler.update();
     this.emitHandler.update(frequency);
