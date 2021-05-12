@@ -1,13 +1,18 @@
-import { ShaderMaterial, Mesh, Scene, Float32BufferAttribute, BufferAttribute, Material, TorusGeometry } from "three";
+import { ShaderMaterial, Mesh, Scene, Float32BufferAttribute, BufferAttribute, TorusGeometry, BufferGeometry } from "three";
 import { vertexShader, fragmentShader } from './shaders';
 
 export class Visualizer {
   private _instance: Mesh;
-  constructor(scene: Scene, private radius: number, private frequencies: BufferAttribute,
-    private radialSegments: number, private tubularSegments: number) {
-    const geo = this.createGeo();
-    const mat = this.createMat();
-    this._instance = new Mesh(geo, mat);
+  private frequencies: BufferAttribute;
+  private radialSegments = 2;
+  private tubularSegments = 360;
+  private geo: BufferGeometry;
+  private mat: ShaderMaterial;
+  constructor(scene: Scene, private radius: number) {
+    this.frequencies = new BufferAttribute(new Float32Array((this.radialSegments + 1) * (this.tubularSegments + 1)), 1);
+    this.geo = this.createGeo();
+    this.mat = this.createMat();
+    this._instance = new Mesh(this.geo, this.mat);
     this._instance.rotateZ(Math.PI / 2);
     scene.add(this._instance);
   }
@@ -30,11 +35,18 @@ export class Visualizer {
       },
     });
   }
-  public update = (time: number) => {
-    (this._instance.material as any).uniforms.uTime.value = time;
+  private updateFrequency = (frequency: number[]) => {
+    this.frequencies.needsUpdate = true;
+    for (let i = 0; i < this.frequencies.count; i++) {
+      (this.frequencies.array[i] as any) = frequency[i % (this.tubularSegments + 1)] || 0;
+    }
+  }
+  public update = (frequency: number[], time: number) => {
+    this.updateFrequency(frequency)
+    this.mat.uniforms.uTime.value = time;
   }
   public dispose = () => {
-    this._instance.geometry.dispose();
-    (this._instance.material as Material).dispose();
+    this.geo.dispose();
+    this.mat.dispose();
   }
 }

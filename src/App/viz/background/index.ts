@@ -1,11 +1,10 @@
-import { ShaderMaterial, Mesh, Scene, Material, PlaneGeometry, BufferAttribute } from "three";
+import { ShaderMaterial, Mesh, Scene, Material, PlaneGeometry } from "three";
 import { vertexShader, fragmentShader } from './shaders';
 
 export class Background {
   private _instance: Mesh;
-  constructor(scene: Scene, frequencies: BufferAttribute) {
+  constructor(scene: Scene) {
     const geo = new PlaneGeometry(3000, 3000);
-    geo.setAttribute('aFrequency', frequencies);
     const mat = this.createMat();
     this._instance = new Mesh(geo, mat);
     this._instance.position.setZ(-10);
