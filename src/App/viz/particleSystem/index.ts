@@ -1,6 +1,6 @@
 import {
-  InstancedBufferGeometry, ShaderMaterial, Mesh, InstancedBufferAttribute,
-  UniformsUtils, WebGLRenderer, IUniform, BoxBufferGeometry, Scene, Clock, BufferAttribute, BufferGeometry, Points
+  ShaderMaterial, UniformsUtils, WebGLRenderer, IUniform, Scene, Clock, BufferAttribute,
+  AdditiveBlending, Points, BufferGeometry,
 } from "three";
 import { vertexShader, fragmentShader } from './shaders';
 import { GPUHandler } from "./gpuHandler";
@@ -11,18 +11,17 @@ export class ParticleSystem {
   private emitHandler: EmitHandler;
   private geo: BufferGeometry;
   private mat: ShaderMaterial;
+  private size = 128;
   private _instance: Points;
-  constructor(renderer: WebGLRenderer, scene: Scene, radius: number, private clock: Clock, private frequencies: BufferAttribute) {
-    const size = 128;
-    this.geo = this.setupGeometry(size);
+  constructor(renderer: WebGLRenderer, scene: Scene, radius: number, private clock: Clock) {
+    this.geo = this.setupGeometry(this.size);
     this.mat = this.setupMaterial();
     this._instance = new Points(this.geo, this.mat);
     scene.add(this._instance);
-    this.gpuHandler = new GPUHandler(size, renderer, this.uniforms, this.clock);
+    this.gpuHandler = new GPUHandler(this.size, renderer, this.uniforms, this.clock);
     this.emitHandler = new EmitHandler(this.gpuHandler, radius);
   }
-  private setReference = (size: number) => {
-    const cnt = size ** 2;
+  private setReference = (cnt: number, size: number) => {
     const references = new BufferAttribute(new Float32Array(cnt * 2), 2);
     for (let i = 0; i < cnt; i++) {
       const x = (i % size) / size;
@@ -33,10 +32,8 @@ export class ParticleSystem {
   }
   private setupGeometry = (size: number) => {
     const geo = new BufferGeometry();
-    const pos = new BufferAttribute(new Float32Array(size ** 2 * 3), 3);
-    geo.setAttribute('position', pos);
-    geo.setAttribute('reference', this.setReference(size));
-    geo.setAttribute('aFrequency', this.frequencies);
+    geo.setAttribute('position', new BufferAttribute(new Float32Array(size ** 2 * 3), 3));
+    geo.setAttribute('reference', this.setReference(size ** 2, size));
     return geo;
   }
   private setupMaterial = () => {
@@ -44,20 +41,20 @@ export class ParticleSystem {
       { textureParams: { value: null } },
       { texturePosition: { value: null } },
       { textureVelocity: { value: null } },
-      { uTime: { value: 0 }, }
+      { uTime: { value: 0 } },
     ]);
     return new ShaderMaterial({
       vertexShader,
       fragmentShader,
       uniforms: this.uniforms,
       transparent: true,
+      blending: AdditiveBlending,
     });
   }
-  public update = (frequency: number[], time: number) => {
-    (this._instance.material as any).uniforms.uTime.value = time;
+  public update = (frequency:number[], time: number) => {
+    this.uniforms.uTime.value = time;
     this.gpuHandler.update();
     this.emitHandler.update(frequency);
-    this.uniforms.uTime.value = this.clock.getElapsedTime();
   }
   public dispose = () => {
     this.geo.dispose();

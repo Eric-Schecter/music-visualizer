@@ -1,6 +1,5 @@
 uniform float uTime;
 in vec3 vPos;
-in vec2 vUv;
 
 #include <lighteffect.glsl>;
 
