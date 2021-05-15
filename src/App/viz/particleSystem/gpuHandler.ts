@@ -1,5 +1,5 @@
 import { GPUComputationRenderer, Variable } from "three/examples/jsm/misc/GPUComputationRenderer";
-import { IUniform, WebGLRenderer, RepeatWrapping, Texture, DataTexture, RGBAFormat, Clock, FloatType } from "three";
+import { IUniform, WebGLRenderer, Texture, DataTexture, RGBAFormat, Clock, FloatType } from "three";
 import { fragmentPos, fragmentVelocity } from "./shaders";
 
 export class GPUHandler {
@@ -24,11 +24,7 @@ export class GPUHandler {
     this.setupGpgpu();
   }
   private setDependency = (dependencies: Variable[]) => {
-    dependencies.forEach(dependency => {
-      this.gpuCompute.setVariableDependencies(dependency, dependencies);
-      dependency.wrapS = RepeatWrapping;
-      dependency.wrapT = RepeatWrapping;
-    })
+    dependencies.forEach(dependency => this.gpuCompute.setVariableDependencies(dependency, dependencies))
   }
   private setupGpgpu = () => {
     this.setDependency([this.positionVariable, this.velocityVariable]);
