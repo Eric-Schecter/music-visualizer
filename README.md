@@ -17,7 +17,7 @@ git clone git@github.com:Eric-Schecter/music-visualizer.git
 ```
 2. Open Folder  
 ```
-cd DataEditor
+cd music-visualizer
 ```
 3. Install npm packages  
 ```
